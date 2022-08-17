@@ -1,0 +1,20 @@
+{
+    "name": "bdt011/bdt-support",
+    "description": "A plugin for Support Manager",
+    "type": "wordpress-plugin",
+    "license": "GPLv2",
+    "authors": [
+        {
+            "name": "Shahidul Islam",
+            "email": "bdkoder@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Bdt\\Support\\": "includes/"
+        },
+        "files": ["includes/functions.php"]
+    },
+    "minimum-stability": "dev",
+    "require": {}
+}
