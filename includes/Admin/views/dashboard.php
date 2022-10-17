@@ -4,25 +4,21 @@
     <div class="bdts-wrapper">
         <div class="bdts-section bdt-flex bdt-padding-large">
             <div class="bdts-menu">
-                <div>
-                    <img src="">
-                </div>
-                <ul class="bdt-tab-left bdt-tab bdt-main-tab" data-bdt-tab="{connect:'#bdt-main-tab'}">
-                    <li data-index="0" class="bdt-active">
-                        <a href="#">
-                            <span class="dashicons dashicons-admin-users"></span>
+                <ul class="bdt-tab-left bdt-tab bdt-main-tab">
+                    <li data-index="0">
+                        <a href="#" class="bdt-link-heading">
+                            <span class="dashicons dashicons-search"></span>
                         </a>
                     </li>
                     <li data-index="1">
-                        <a href="#">Item</a>
-                    </li>
-                    <li data-index="2">
-                        <a href="#">Settings</a>
+                        <a href="#" class="bdt-margin-top bdt-link-heading">
+                            <span class="dashicons dashicons-admin-generic"></span>
+                        </a>
                     </li>
                 </ul>
             </div>
-            <div class="bdts-content">
-                <ul id="bdt-main-tab" class="bdt-switcher bdt-margin">
+            <div class="bdt-switcher-wrapper">
+                <ul id="bdt-tab-content" class="bdt-margin">
                     <li class="bdt-content-item bdt-active">
                         <div class="bdts-form-wrapper">
                             <form method="post" id="check-license-form">
@@ -37,57 +33,60 @@
                             </form>
                         </div>
                     </li>
-                    <li class="bdt-content-item">Content 2</li>
                     <li class="bdt-content-item">
-                        Settings
-                        <form class="bdt-form-horizontal bdt-margin-large" id="bdts-settings-form" method="POST">
+                        <?php if (current_user_can('administrator')) : ?>
+                            <form class="bdt-form-stacked bdt-margin-large" id="bdts-settings-form" method="POST">
+                                <div class="bdt-margin">
+                                    <label class="bdt-form-label" for="api_key">
+                                        <?php echo __('API KEY', 'bdthemes-support-manager'); ?>
+                                    </label>
+                                    <div class="bdt-form-controls">
+                                        <?php
+                                        $get_option = get_option('bdts_settings');
+                                        $get_option = $get_option;
 
-                            <div class="bdt-margin">
-                                <label class="bdt-form-label" for="api_key">API KEY</label>
-                                <div class="bdt-form-controls">
-                                    <?php
-                                    $get_option = get_option('bdts_settings');
-                                    $get_option = $get_option;
-                                    ?>
-                                    <input class="bdt-input bdt-w-100" id="api_key" type="text" placeholder="API KEY" name="api_key" 
-                                    value="<?php
-                                    if(isset($get_option['api_key'])){
-                                        echo $get_option['api_key'];
-                                    }
-                                    ?>">
-                                </div>
-                            </div>
-                            <div class="bdt-margin">
-                                <label class="bdt-form-label" for="api_end_point">API EndPoint</label>
-                                <div class="bdt-form-controls">
-                                    <input class="bdt-input bdt-w-100" id="api_end_point" type="text" placeholder="API KEY" name="api_end_point" 
-                                    value="<?php
-                                    if(isset($get_option['api_end_point'])){
-                                        echo $get_option['api_end_point'];
-                                    }
-                                    ?>">
-                                </div>
-                            </div>
-                            <input type="hidden" name="action" value="bdts_save_settings">
-                            <?php wp_nonce_field('save-settings'); ?>
-                            <div class="bdt-margin">
-                                <div class="bdt-form-controls">
-                                    <?php submit_button(__('SAVE SETTINGS', 'bdt-support-manager'), ['bdt-w-100 bdt-button bdt-button-primary'], 'submit_event'); ?>
-                                </div>
-                            </div>
+                                        $api_key = '';
+                                        if (isset($get_option['api_key'])) {
+                                            $api_key = $get_option['api_key'];
+                                        }
 
-                        </form>
+                                        $api_end_point = '';
+                                        if (isset($get_option['api_end_point'])) {
+                                            $api_end_point = $get_option['api_end_point'];
+                                        }
+
+                                        ?>
+                                        <input class="bdt-input bdt-form-large" id="api_key" type="text" placeholder="API KEY" name="api_key" value="<?php echo esc_attr($api_key); ?>">
+                                    </div>
+                                </div>
+                                <div class="bdt-margin">
+                                    <label class="bdt-form-label" for="api_end_point">
+                                        <?php echo __('API End Point', 'bdthemes-support-manager'); ?>
+                                    </label>
+                                    <div class="bdt-form-controls">
+                                        <input class="bdt-input bdt-form-large" id="api_end_point" type="text" placeholder="API KEY" name="api_end_point" value="<?php echo esc_attr($api_end_point); ?>">
+                                    </div>
+                                </div>
+                                <input type="hidden" name="action" value="bdts_save_settings">
+                                <?php wp_nonce_field('save-settings'); ?>
+                                <div class="bdt-margin">
+                                    <button type="submit" class="bdt-w-100 bdt-button bdt-button-primary bdt-button-large" id="submit_event" name="submit_event">
+                                        <?php echo __('SAVE SETTINGS', 'bdt-support-manager'); ?>
+                                    </button>
+                                </div>
+
+                            </form>
+                        <?php else : ?>
+                            <div class="bdt-not-access">
+                                <h3>Sorry, you are not able to access this area!</h3>
+                                <span class="dashicons dashicons-lock"></span>
+                            </div>
+                        <?php endif; ?>
                     </li>
                 </ul>
             </div>
         </div>
     </div>
-
-    <!-- This is a button toggling the modal -->
-    <button class="bdt-button bdt-button-default bdt-margin-small-right" type="button" bdt-toggle="target: #bdts-modal">Open</button>
-
-    <!-- This is an anchor toggling the modal -->
-    <a href="#bdts-modal" bdt-toggle>Open</a>
 
     <!-- This is the modal -->
     <div id="bdts-modal" bdt-modal>

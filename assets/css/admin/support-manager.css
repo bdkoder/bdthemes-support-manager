@@ -5,6 +5,7 @@
 
 .bdt-main-tab li {
     outline: none;
+    display: inline-block;
 }
 
 .bdt-main-tab a {
@@ -17,6 +18,14 @@
     font-size: 46px;
 }
 
+.bdt-content-item {
+    display: none;
+}
+
+.bdt-content-item.bdt-active {
+    display: block;
+}
+
 .bdts-menu {
     width: 150px;
     border-right: 1px solid #ddd;
@@ -25,7 +34,7 @@
 
 .bdts-form-wrapper {}
 
-.bdts-form-wrapper .bdt-form-large {
+.bdts-form-wrapper .bdt-form-large, .bdt-content-item .bdt-form-large {
     width: 25em;
     height: 46px
 }
@@ -69,4 +78,13 @@
 
 .bdts-domain-search-input, .bdt-w-100 {
     width: 100% !important;
+}
+
+.bdt-link-heading:focus {
+    border: none;
+    box-shadow: none;
+}
+
+.bdt-not-access .dashicons-lock {
+    font-size: 50px;
 }

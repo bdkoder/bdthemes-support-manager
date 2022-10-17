@@ -3,9 +3,9 @@
 /**
  * Plugin Name: Bdthemes Support Manager
  * Description: A simple description of our plguin
- * Plugin URI: http://nas.com
+ * Plugin URI: http://bdthemes.com
  * Author: bdThemes
- * Author URI: http://nas.com
+ * Author URI: http://bdthemes.com
  * Version: 1.0
  * License: GPL2
  * Text Domain: bdt-support-manager

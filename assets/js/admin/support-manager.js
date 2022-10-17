@@ -3,8 +3,9 @@
 
     $('.bdts-wrapper').find('.bdt-main-tab li').on('click', function () {
         let $tabIndex = $(this).data('index');
-        $('#bdt-main-tab .bdt-content-item').removeClass('bdt-active');
-        $('#bdt-main-tab .bdt-content-item:eq(' + $tabIndex + ')').addClass('bdt-active');
+        console.log($tabIndex);
+        $('#bdt-tab-content .bdt-content-item').removeClass('bdt-active');
+        $('#bdt-tab-content .bdt-content-item:eq(' + $tabIndex + ')').addClass('bdt-active');
     });
 
     jQuery(document).on('keyup change', '#bdts-domain-search-input', function () {
@@ -83,7 +84,7 @@
             });
         },
         saveSettings: function (data) {
-             var Obj = this;
+            var Obj = this;
             $.ajax({
                 type: 'POST',
                 url: ajaxurl,
@@ -196,109 +197,5 @@
             }
         });
     }
-
-    //check-license
-
-    jQuery(document).ready(function ($) {
-        $('#check-license-formXXX').on('submit', function (event) {
-            event.preventDefault();
-            var data = $(this).serializeArray();
-            Swal.showLoading();
-
-            jQuery.ajax({
-                type: "POST",
-                url: ajaxurl,
-                data: data,
-                success: function (data) {
-                    let response = JSON.parse(data);
-                    console.log(response);
-
-                    if (response == 'field-blank') {
-
-                        return;
-                    }
-
-                    return;
-
-                    if (response.type == 'field-blank') {
-                        $('#result-error').html(response.text);
-                    }
-                    if (response.type == 'cheating') {
-                        $('#result-error').html(response.text);
-                    }
-                    if (response.type == 'success') {
-                        $('#result-error').html('');
-
-                        $('#product_name').html(licenseData.product_name);
-                        $('#license_title').html(licenseData.license_title);
-                        $('#market').html(licenseData.market);
-                        $('#has_support').html(licenseData.has_support);
-                        $('#entry_time').html(licenseData.entry_time);
-                        $('#expiry_time').html(licenseData.expiry_time);
-                        $('#support_end_time').html(licenseData.support_end_time);
-                        $('#max_domain').html(licenseData.max_domain);
-                        $('#status').html(licenseData.status);
-                        // $('#active_domains').html(licenseData.active_domains);
-
-                        // console.log(licenseData.active_domains);
-
-                        var countries = licenseData.active_domains;
-                        var cList = $('ul.bdts-domain-list')
-                        $.each(countries, function (i) {
-                            var li = $('<li/>')
-                                .addClass('bdt-domain-item')
-                                .attr('role', 'menuitem')
-                                .appendTo(cList);
-                            var aaa = $('<div/>')
-                                .addClass('bdt-domain-item-wrap')
-                                .html(i + '. ' + countries[i] + '<a class="bdt-domain-remove" data-license="' + licenseData.purchase_key + '" data-domain="' + countries[i] + '" data-id="bdt-domain-' + i + '" id="bdt-domain-' + i + '">remove</a>')
-                                .appendTo(li);
-                        });
-
-
-
-
-
-                        client_view(licenseData.id);
-                        remove_domain();
-
-                    }
-
-                },
-                error: function (errorThrown) {
-                    alert(errorThrown);
-                }
-
-            });
-        });
-
-        function remove_domain() {
-            $('.bdt-domain-remove').on('click', function (event) {
-                // event.preventDefault();
-                $license = $(this).data('license');
-                $domain = $(this).data('domain');
-                $id = $(this).data('id');
-
-
-                jQuery.ajax({
-                    type: "POST",
-                    url: ajaxurl,
-                    data: {
-                        'action': 'remove_domain',
-                        'license': $license,
-                        'domain': $domain,
-                    },
-                    success: function (data) {
-                        let response = JSON.parse(data);
-                        let responseObj = JSON.parse(response);
-                        alert(responseObj.msg);
-                        $('#' + $id).closest('.bdt-domain-item').remove();
-                    }
-                });
-            });
-        }
-
-
-    });
 
 })(jQuery);
