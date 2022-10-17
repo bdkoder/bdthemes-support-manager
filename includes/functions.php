@@ -13,20 +13,54 @@ if (isset($get_option['api_end_point'])) {
 }
 
 
-class BDTS_APP
-{
+class BDTS_APP {
     public $CURLOPT_URL = API_ENDPOINT;
     public $API_KEY     = API_KEY;
 
-    public function __construct()
-    {
+    public function __construct() {
     }
 
-    public function throw_error()
-    {
+    public function throw_error() {
         $msg = 'error';
         echo wp_json_encode($msg);
         wp_die();
+    }
+
+    /**
+     * Get the Name of Product
+     * By ID & License
+     *
+     * @return void
+     */
+    public function product_details($license, $product_id){
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL            => $this->CURLOPT_URL . 'product/view',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING       => "",
+            CURLOPT_MAXREDIRS      => 10,
+            CURLOPT_TIMEOUT        => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => false,
+
+            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST  => "POST",
+            CURLOPT_POSTFIELDS     => array(
+                'api_key'          => $this->API_KEY,
+                'license_code'     => $license,
+                'product_id'       => $product_id,
+            ),
+        ));
+
+        $response = curl_exec($curl);
+        $response = json_decode($response, true);
+
+        curl_close($curl);
+
+        return $response['data'];
     }
 
     /**
@@ -34,8 +68,7 @@ class BDTS_APP
      *
      * @return void
      */
-    public function license_details($license)
-    {
+    public function license_details($license) {
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
@@ -113,10 +146,14 @@ class BDTS_APP
             $has_support = '<span class="bdt-text-danger bdt-text-bold" bdt-title="Please Contact License Manager."> Unknown </span>';
         }
         $domain_list = '';
+        if(empty($response['data']['active_domains'])){
+            $domain_list = '<strong class="bdt-text-danger">Domain Not Found.</strong>';
+        }
         foreach ($response['data']['active_domains'] as $index => $item) {
+            $rand_data = rand(100, 1000);
             $domain_list .= '<li><div>
                 <span>' . $item . ' </span>
-                <a href="javascript:void(0);" id="bdts-' . $index . '"  data-id="bdts-' . $index . '" class="bdts-remove-domain bdt-background-danger" data-license="' . $response['data']['purchase_key'] . '" data-domain="' . $item . '">Remove</a></div>
+                <a href="javascript:void(0);" id="bdts-' . $index . '-' .  $rand_data . '"  data-id="bdts-' . $index . '-' .  $rand_data . '" class="bdts-remove-domain bdt-background-danger" data-license="' . $response['data']['purchase_key'] . '" data-domain="' . $item . '">Remove</a></div>
             </li>';
         }
 
@@ -129,7 +166,7 @@ class BDTS_APP
             $result .= $client_info;
         }
 
-        $result .= '<h3>License Information</h3>';
+        $result .= '<h3 class="bdt-margin bdt-padding-small bdt-text-center">License Information</h3>';
 
         $result .= '<table class="bdt-table bdt-table-striped">
                     <tbody>
@@ -143,7 +180,7 @@ class BDTS_APP
                             <td>
                                 <strong>Product Name</strong>
                             </td>
-                            <td colspan="3">' . $response['data']['license_title'] . '</td>
+                            <td colspan="3"><strong class="bdt-text-success"> ' . $response['data']['product_name'] . ' </strong><i>(' . $response['data']['license_title'] . ')</i></td>
                         </tr>
                         <tr>
                             <td>
@@ -181,7 +218,7 @@ class BDTS_APP
                 <div class="bdt-margin">
                     <input id="bdts-domain-search-input" class="bdt-input bdt-form-width-large bdts-domain-search-input" type="text" placeholder="Search Domain">
                 </div>
-                <ol class="bdt-list bdt-list-striped bdt-margin bdts-domain-list">
+                <ol class="bdt-list bdt-list-striped bdt-margin-top bdt-padding-small bdt-padding-remove-left bdts-domain-list">
                 ' . $domain_list . '
                 </ol>';
 
@@ -193,8 +230,7 @@ class BDTS_APP
      *
      * @return void
      */
-    public function get_licenses($email)
-    {
+    public function get_licenses($email) {
         if (!isset($email)) {
             $this->throw_error();
         }
@@ -249,9 +285,9 @@ class BDTS_APP
          * Inject Clients Personal Information
          */
 
-        if ($client_info !== false) {
-            $result .= $client_info;
-        }
+        // if ($client_info !== false) {
+        //     $result .= $client_info;
+        // }
 
         foreach ($response['data']['licenses'] as $key => $item) {
             $key += 1;
@@ -292,53 +328,56 @@ class BDTS_APP
                 $has_support = '<span class="bdt-text-danger bdt-text-bold" bdt-title="Please Contact License Manager."> Unknown </span>';
             }
 
-            $result .= '<h3>License NO - ' . $key . ' </h3>';
-            $result .= '<table class="bdt-table bdt-table-striped"><tbody>
-                        <tr>
-                            <td>
-                                <strong>License Code</strong>
-                            </td>
-                            <td colspan="3">' . $item['purchase_key'] . ' (' . $status . ')</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <strong>License Title</strong>
-                            </td>
-                            <td colspan="3">' . $item['license_title'] . '</td>
-                        </tr>
-                        <tr>
-                            <td>
-                            <strong>Buy From</strong>
-                            </td>
-                            <td>' . $market . '</td>
-                            <td>
-                            <strong>Support</strong>
-                            </td>
-                            <td>' . $has_support . '</td>
-                        </tr>
-                        <tr>
-                            <td>
-                            <strong>Purchase Date</strong>
-                            </td>
-                            <td>' . date('d M, Y', strtotime($item['entry_time'])) . '</td>
-                            <td>
-                            <strong>Expire Date</strong>
-                            </td>
-                            <td>' . ($item['expiry_time'] !== null ? date('d M, Y', strtotime($item['expiry_time'])) : 'Lifetime') . '</td>
-                        </tr>
-                        <tr>
-                            <td>
-                            <strong>Support End</strong>
-                            </td>
-                            <td>' . ($item['support_end_time'] !== null ? date('d M, Y', strtotime($item['support_end_time'])) : 'Lifetime') . '</td>
-                            <td>
-                            <strong>Max Domain</strong>
-                            </td>
-                            <td>' . $item['max_domain'] . '</td>
-                        </tr>
-                        ';
+            $product_details = $this->product_details($item['purchase_key'], $item['product_id']);
 
-            $result .= '</tbody> </table>';
+            $result .= '<h3 class="bdt-background-primary bdt-padding-small bdt-panel">License NO - ' . $key . ' </h3>';
+            // $result .= '<table class="bdt-table bdt-table-striped"><tbody>
+            //             <tr>
+            //                 <td>
+            //                     <strong>License Code</strong>
+            //                 </td>
+            //                 <td colspan="3">' . $item['purchase_key'] . ' (' . $status . ')</td>
+            //             </tr>
+            //             <tr>
+            //                 <td>
+            //                     <strong>License Title</strong>
+            //                 </td>
+            //                 <td colspan="3"><strong class="bdt-text-success"> ' . $product_details['product_name'] . ' </strong><i>(' . $item['license_title'] . ')</i></td>
+            //             </tr>
+            //             <tr>
+            //                 <td>
+            //                 <strong>Buy From</strong>
+            //                 </td>
+            //                 <td>' . $market . '</td>
+            //                 <td>
+            //                 <strong>Support</strong>
+            //                 </td>
+            //                 <td>' . $has_support . '</td>
+            //             </tr>
+            //             <tr>
+            //                 <td>
+            //                 <strong>Purchase Date</strong>
+            //                 </td>
+            //                 <td>' . date('d M, Y', strtotime($item['entry_time'])) . '</td>
+            //                 <td>
+            //                 <strong>Expire Date</strong>
+            //                 </td>
+            //                 <td>' . ($item['expiry_time'] !== null ? date('d M, Y', strtotime($item['expiry_time'])) : 'Lifetime') . '</td>
+            //             </tr>
+            //             <tr>
+            //                 <td>
+            //                 <strong>Support End</strong>
+            //                 </td>
+            //                 <td>' . ($item['support_end_time'] !== null ? date('d M, Y', strtotime($item['support_end_time'])) : 'Lifetime') . '</td>
+            //                 <td>
+            //                 <strong>Max Domain</strong>
+            //                 </td>
+            //                 <td>' . $item['max_domain'] . '</td>
+            //             </tr>
+            //             ';
+
+            // $result .= '</tbody> </table>';
+            $result .= $this->license_details($item['purchase_key']);
         }
 
 
@@ -350,8 +389,7 @@ class BDTS_APP
      *
      * @return void
      */
-    public function get_client_info($client_id)
-    {
+    public function get_client_info($client_id) {
         if (empty($client_id)) {
             $this->throw_error();
         }
@@ -395,7 +433,7 @@ class BDTS_APP
             $status = '<span class="bdt-text-danger bdt-text-bold"> In-active </span>';
         }
 
-        $result = '<h3>Client Personal Information</h3>';
+        $result = '<h3 class="bdt-margin bdt-padding-small bdt-text-center">Client Personal Information</h3>';
         $result .= '<table class="bdt-table bdt-table-striped">
                         <tbody>
                             <tr>
@@ -437,8 +475,7 @@ class BDTS_APP
      * @param [type] $data
      * @return void
      */
-    public function detect_info($data)
-    {
+    public function detect_info($data) {
 
         if (empty($data['identity'])) {
             $msg = 'field-blank';
@@ -482,8 +519,7 @@ class BDTS_APP
      *
      * @return void
      */
-    public function remove_domain($data)
-    {
+    public function remove_domain($data) {
 
         if (!isset($data['license_code']) || !isset($data['domain'])) {
             $this->throw_error();
@@ -535,8 +571,7 @@ class BDTS_APP
      * @return void
      */
 
-    public function save_settings($data)
-    {
+    public function save_settings($data) {
         /* hit bottom of screen event  */
 
         $option    = 'bdts_settings';
@@ -566,85 +601,18 @@ class BDTS_APP
 
 
 
-function info_detect()
-{
+function info_detect() {
     $bdts_app = new BDTS_APP();
     $bdts_app->detect_info($_POST);
 }
 
-function remove_domain()
-{
+function remove_domain() {
     $bdts_app = new BDTS_APP();
     $bdts_app->remove_domain($_POST);
 }
 
-function save_settings()
-{
+function save_settings() {
     $bdts_app = new BDTS_APP();
     $bdts_app->save_settings($_POST);
 }
 
-
-/**
- * Generate License
- *
- * @return json data
- * Not used
- */
-function generate_license()
-{
-    if (empty($_POST['clientName']) || empty($_POST['clientEmail'])) {
-        $msg['type'] = 'field-blank';
-        $msg['class'] = 'bdt-padding-small bdt-alert-danger';
-        $msg['text'] = '<strong>Ops!</strong> Client Name or email should not be empty!';
-        echo wp_json_encode($msg);
-        wp_die();
-    }
-
-    if (!wp_verify_nonce($_REQUEST['_wpnonce'], 'generate-license')) {
-        $msg['type'] = 'cheating';
-        $msg['class'] = 'bdt-padding-small bdt-alert-danger';
-        $msg['text'] = '<strong>Ops!</strong> Are you cheating!';
-        echo wp_json_encode($msg);
-        wp_die();
-    }
-
-    $name = $_POST['clientName'];
-    $email = $_POST['clientEmail'];
-
-    $curl = curl_init();
-
-    curl_setopt_array($curl, array(
-        CURLOPT_URL => "https: //licenses.bdthemes.co/wp-json/licensor/license/add",
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "POST",
-        CURLOPT_POSTFIELDS => array(
-            'api_key' => 'xxxxxxxxxxxxxxxxxx',
-            'product_id' => '1',
-            'license_id' => '1',
-            'client_email' => $email,
-            'client_name' => $name,
-            'market' => 'F',
-            'return_license_only' => '1'
-        ),
-    ));
-
-    $response = curl_exec($curl);
-
-    curl_close($curl);
-
-    $msg['type'] = 'success';
-    $msg['class'] = 'bdt-padding-small bdt-alert-success';
-    $msg['text'] = '<strong>Congrats,</strong> License successfully added';
-    $msg['client_email'] = $email;
-    $msg['license_code'] = $response;
-
-    echo wp_json_encode($msg);
-
-    wp_die();
-}

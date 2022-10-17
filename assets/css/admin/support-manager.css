@@ -88,3 +88,11 @@
 .bdt-not-access .dashicons-lock {
     font-size: 50px;
 }
+
+h3.bdt-panel {
+    color: #fff;
+}
+
+.bdt-list+.bdt-panel {
+    margin-top: 50px !important;
+}

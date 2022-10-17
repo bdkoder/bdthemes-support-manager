@@ -1,9 +1,7 @@
 (function ($) {
 
-
     $('.bdts-wrapper').find('.bdt-main-tab li').on('click', function () {
         let $tabIndex = $(this).data('index');
-        console.log($tabIndex);
         $('#bdt-tab-content .bdt-content-item').removeClass('bdt-active');
         $('#bdt-tab-content .bdt-content-item:eq(' + $tabIndex + ')').addClass('bdt-active');
     });
@@ -32,6 +30,9 @@
                 icon: $icon,
             })
         },
+        loader: function(){
+            Swal.showLoading();
+        },
         checkInfo: function (data) {
             var Obj = this;
             jQuery.ajax({
@@ -40,7 +41,6 @@
                 data: data,
                 success: function (data) {
                     let response = JSON.parse(data);
-                    console.log(response);
 
                     if (response == 'field-blank') {
                         Obj.alertMsg('Ops!', 'Field should not be empty!', 'warning')
@@ -110,7 +110,7 @@
             $('#check-license-form').on('submit', function (event) {
                 event.preventDefault();
                 let data = $(this).serializeArray();
-                Swal.showLoading();
+                App.loader();
                 Obj.checkInfo(data);
             });
 
@@ -122,7 +122,7 @@
                 $license = $(this).data('license');
                 $domain = $(this).data('domain');
                 $id = $(this).data('id');
-                Swal.showLoading();
+                App.loader();
                 Obj.removeDomain($id, $license, $domain);
             });
 
@@ -133,7 +133,7 @@
             $('#bdts-settings-form').on('submit', function (e) {
                 e.preventDefault();
                 let data = $(this).serializeArray();
-                Swal.showLoading();
+                App.loader();
                 Obj.saveSettings(data);
             });
 
@@ -141,61 +141,5 @@
     }
 
     App.init();
-
-
-    //generate-license
-    jQuery(document).ready(function ($) {
-        $('#generate-license-form').on('submit', function (event) {
-            event.preventDefault();
-            var data = $(this).serializeArray();
-            jQuery.ajax({
-                type: "POST",
-                url: ajaxurl,
-                data: data,
-                success: function (data) {
-                    $('.bdt-sm-result').show();
-                    let response = JSON.parse(data);
-                    if (response.type == 'field-blank') {
-                        $('#bdt-sm-result').html(response.text);
-                    }
-                    if (response.type == 'cheating') {
-                        $('#bdt-sm-result').html(response.text);
-                    }
-                    if (response.type == 'success') {
-                        $('#bdt-sm-result').html(response.text + '<br>' + response.client_email + '<br>' + response.license_code);
-                    }
-
-                },
-                error: function (errorThrown) {
-                    alert(errorThrown);
-                }
-
-            });
-        });
-    });
-
-
-    function client_view(data) {
-        jQuery.ajax({
-            type: "POST",
-            url: ajaxurl,
-            data: {
-                'action': 'client_view',
-                'client_id': data
-            },
-            success: function (data) {
-                let response = JSON.parse(data);
-                let licenseObj = JSON.parse(response.license_code);
-                let licenseData = licenseObj.data;
-                if (licenseData) {
-                    $('#company').html(licenseData.company);
-                    $('#country').html(licenseData.country);
-                    $('#email').html(licenseData.email);
-                    $('#name').html(licenseData.name);
-                }
-
-            }
-        });
-    }
 
 })(jQuery);

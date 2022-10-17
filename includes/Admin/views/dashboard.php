@@ -89,7 +89,7 @@
     </div>
 
     <!-- This is the modal -->
-    <div id="bdts-modal" bdt-modal>
+    <div id="bdts-modal" data-bdt-modal data-bg-close="false">
         <div class="bdt-modal-dialog">
             <button class="bdt-modal-close-default" type="button" bdt-close></button>
             <div class="bdt-modal-header">
