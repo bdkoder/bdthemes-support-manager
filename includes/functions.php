@@ -99,61 +99,62 @@ class BDTS_APP {
             return 'error';
         }
 
+        $response = $response['data'];
+
         /**
          * Get Information of Clients
          */
         $client_info = false;
-        if (isset($response['data']['client_id'])) {
-            $client_info = $this->get_client_info($response['data']['client_id']);
+        if (isset($response['client_id'])) {
+            $client_info = $this->get_client_info($response['client_id']);
         }
 
 
-
         $status = '';
-        if ($response['data']['status'] == 'A') {
+        if ($response['status'] == 'A') {
             $status = '<span class="bdt-text-success bdt-text-bold"> Active </span>';
-        } elseif ($response['data']['status'] == 'R') {
+        } elseif ($response['status'] == 'R') {
             $status = '<span class="bdt-text-danger bdt-text-bold"> Refunded </span>';
-        } elseif ($response['data']['status'] == 'I') {
+        } elseif ($response['status'] == 'I') {
             $status = '<span class="bdt-text-warning bdt-text-bold"> In-Active </span>';
-        } elseif ($response['data']['status'] == 'W') {
+        } elseif ($response['status'] == 'W') {
             $status = '<span class="bdt-text-success bdt-text-bold"> Free </span>';
         } else {
             $status = '<span class="bdt-text-danger bdt-text-bold" bdt-title="Please Contact License Manager."> Unknown Error </span>';
         }
 
         $market = '';
-        if ($response['data']['market'] == 'E') {
+        if ($response['market'] == 'E') {
             $market = '<span class="bdt-text-success bdt-text-bold"> Envato </span>';
-        } elseif ($response['data']['market'] == 'J') {
+        } elseif ($response['market'] == 'J') {
             $market = '<span class="bdt-text-danger bdt-text-bold"> JVZoo </span>';
-        } elseif ($response['data']['market'] == 'F') {
+        } elseif ($response['market'] == 'F') {
             $market = '<span class="bdt-text-warning bdt-text-bold"> FastSpring </span>';
-        } elseif ($response['data']['market'] == 'P') {
+        } elseif ($response['market'] == 'P') {
             $market = '<span class="bdt-text-success bdt-text-bold"> Paddle </span>';
-        } elseif ($response['data']['market'] == 'W') {
+        } elseif ($response['market'] == 'W') {
             $market = '<span class="bdt-text-success bdt-text-bold"> WooCommerce </span>';
         } else {
             $market = '<span class="bdt-text-danger bdt-text-bold" bdt-title="Please Contact License Manager."> Unknown </span>';
         }
 
         $has_support = '';
-        if ($response['data']['has_support'] == 'U') {
+        if ($response['has_support'] == 'U') {
             $has_support = '<span class="bdt-text-success bdt-text-bold"> Lifetime </span>';
-        } elseif ($response['data']['has_support'] == 'Y') {
+        } elseif ($response['has_support'] == 'Y') {
             $has_support = '<span class="bdt-text-success bdt-text-bold"> Yes </span>';
         } else {
             $has_support = '<span class="bdt-text-danger bdt-text-bold" bdt-title="Please Contact License Manager."> Unknown </span>';
         }
         $domain_list = '';
-        if (empty($response['data']['active_domains'])) {
+        if (empty($response['active_domains'])) {
             $domain_list = '<strong class="bdt-text-danger">Domain Not Found.</strong>';
         }
-        foreach ($response['data']['active_domains'] as $index => $item) {
+        foreach ($response['active_domains'] as $index => $item) {
             $rand_data = rand(100, 1000);
             $domain_list .= '<li><div>
                 <span>' . $item . ' </span>
-                <a href="javascript:void(0);" id="bdts-' . $index . '-' .  $rand_data . '"  data-id="bdts-' . $index . '-' .  $rand_data . '" class="bdts-remove-domain bdt-background-danger" data-license="' . $response['data']['purchase_key'] . '" data-domain="' . $item . '">Remove</a></div>
+                <a href="javascript:void(0);" id="bdts-' . $index . '-' .  $rand_data . '"  data-id="bdts-' . $index . '-' .  $rand_data . '" class="bdts-remove-domain bdt-background-danger" data-license="' . $response['purchase_key'] . '" data-domain="' . $item . '">Remove</a></div>
             </li>';
         }
 
@@ -174,13 +175,13 @@ class BDTS_APP {
                             <td>
                                 <strong>License Code</strong>
                             </td>
-                            <td colspan="3">' . $response['data']['purchase_key'] . ' (' . $status . ')</td>
+                            <td colspan="3">' . $response['purchase_key'] . ' (' . $status . ')</td>
                         </tr>
                         <tr>
                             <td>
                                 <strong>Product Name</strong>
                             </td>
-                            <td colspan="3"><strong class="bdt-text-success"> ' . $response['data']['product_name'] . ' </strong><i>(' . $response['data']['license_title'] . ')</i></td>
+                            <td colspan="3"><strong class="bdt-text-success"> ' . $response['product_name'] . ' </strong><i>(' . $response['license_title'] . ')</i></td>
                         </tr>
                         <tr>
                             <td>
@@ -196,25 +197,25 @@ class BDTS_APP {
                             <td>
                             <strong>Purchase Date</strong>
                             </td>
-                            <td>' . date('d M, Y', strtotime($response['data']['entry_time'])) . '</td>
+                            <td>' . date('d M, Y', strtotime($response['entry_time'])) . '</td>
                             <td>
                             <strong>Expire Date</strong>
                             </td>
-                            <td>' . ($response['data']['expiry_time'] !== null ? date('d M, Y', strtotime($response['data']['expiry_time'])) : 'Lifetime') . '</td>
+                            <td>' . ($response['expiry_time'] !== null ? date('d M, Y', strtotime($response['expiry_time'])) : 'Lifetime') . '</td>
                         </tr>
                         <tr>
                             <td>
                             <strong>Support End</strong>
                             </td>
-                            <td>' . ($response['data']['support_end_time'] !== null ? date('d M, Y', strtotime($response['data']['support_end_time'])) : 'Lifetime') . '</td>
+                            <td>' . ($response['support_end_time'] !== null ? date('d M, Y', strtotime($response['support_end_time'])) : 'Lifetime') . '</td>
                             <td>
                             <strong>Max Domain</strong>
                             </td>
-                            <td>' . $response['data']['max_domain'] . '</td>
+                            <td>' . $response['max_domain'] . '</td>
                         </tr>
                     </tbody>
                 </table>
-                <h3>Active Domain\'s</h3>
+                <h3 class="bdt-margin bdt-padding-small bdt-text-center">Active Domain\'s</h3>
                 <div class="bdt-margin">
                     <input id="bdts-domain-search-input" class="bdt-input bdt-form-width-large bdts-domain-search-input" type="text" placeholder="Search Domain">
                 </div>
