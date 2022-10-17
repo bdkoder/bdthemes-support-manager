@@ -30,7 +30,7 @@
                 icon: $icon,
             })
         },
-        loader: function(){
+        loader: function () {
             Swal.showLoading();
         },
         checkInfo: function (data) {
@@ -48,6 +48,10 @@
                     }
                     if (response == 'error') {
                         Obj.alertMsg('Ops!', 'Something Wrong or License is not correct!', 'warning')
+                        return;
+                    }
+                    if (response == 'nonce_expired') {
+                        Obj.alertMsg('Ops!', 'Session Expired, please reload your webpage.', 'warning')
                         return;
                     }
 

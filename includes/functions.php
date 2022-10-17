@@ -32,7 +32,7 @@ class BDTS_APP {
      *
      * @return void
      */
-    public function product_details($license, $product_id){
+    public function product_details($license, $product_id) {
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
@@ -146,7 +146,7 @@ class BDTS_APP {
             $has_support = '<span class="bdt-text-danger bdt-text-bold" bdt-title="Please Contact License Manager."> Unknown </span>';
         }
         $domain_list = '';
-        if(empty($response['data']['active_domains'])){
+        if (empty($response['data']['active_domains'])) {
             $domain_list = '<strong class="bdt-text-danger">Domain Not Found.</strong>';
         }
         foreach ($response['data']['active_domains'] as $index => $item) {
@@ -484,7 +484,9 @@ class BDTS_APP {
         }
 
         if (!wp_verify_nonce($_REQUEST['_wpnonce'], 'check-info')) {
-            $this->throw_error();
+            echo wp_json_encode('nonce_expired');
+            wp_die();
+            // $this->throw_error();
         }
 
         /**
@@ -615,4 +617,3 @@ function save_settings() {
     $bdts_app = new BDTS_APP();
     $bdts_app->save_settings($_POST);
 }
-
