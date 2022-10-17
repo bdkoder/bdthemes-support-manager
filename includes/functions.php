@@ -218,7 +218,7 @@ class BDTS_APP {
                 <div class="bdt-margin">
                     <input id="bdts-domain-search-input" class="bdt-input bdt-form-width-large bdts-domain-search-input" type="text" placeholder="Search Domain">
                 </div>
-                <ol class="bdt-list bdt-list-striped bdt-margin-top bdt-padding-small bdt-padding-remove-left bdts-domain-list">
+                <ol class="bdt-list bdt-list-striped bdt-margin-remove-left bdt-padding-small bdt-padding-remove-left bdts-domain-list">
                 ' . $domain_list . '
                 </ol>';
 
