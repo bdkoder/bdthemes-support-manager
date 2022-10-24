@@ -64,6 +64,126 @@ class BDTS_APP {
     }
 
     /**
+     * Get Client Email
+     * 
+     * @param mixed $client_id
+     */
+
+    public function get_client_email($client_id){
+        if (empty($client_id)) {
+            $this->throw_error();
+        }
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $this->CURLOPT_URL . 'client/view',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => false,
+
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_POSTFIELDS => array(
+                'api_key' => $this->API_KEY,
+                'client_id' => $client_id,
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        $response = json_decode($response, true);
+
+        if ($response['status'] !== true) {
+            $this->throw_error();
+        }
+
+        if($response['data']['email']){
+            return $response['data']['email'];
+        }
+    }
+
+    /**
+     * Get Active Domains / Websites
+     */
+
+    public function active_websites($email, $license_code){
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL            => $this->CURLOPT_URL . 'license/view_activate_sites',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING       => "",
+            CURLOPT_MAXREDIRS      => 10,
+            CURLOPT_TIMEOUT        => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => false,
+
+            CURLOPT_HTTP_VERSION  => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_POSTFIELDS    => array(
+                'api_key'      => $this->API_KEY,
+                'email'        => $email,
+                'license_code' => $license_code,
+            ),
+        ));
+
+        $response = curl_exec($curl);
+        $response = json_decode($response, true);
+
+        curl_close($curl);
+
+        if ($response['status'] !== true) {
+            $this->throw_error();
+        }
+
+        $domain_list = '';
+        if (empty($response['data'])) {
+            return '<strong class="bdt-text-danger">Domain Not Found.</strong>';
+        }
+
+        // print_r($response['data']); wp_die();
+
+        foreach ($response['data'] as $index => $item) {
+            $rand_data = rand(100, 1000);
+
+            $status = '';
+            $status = '';
+
+            if ($item['status'] == 'A') {
+                $status = '<span class="bdt-text-success bdt-text-bold"> Active </span>';
+            }elseif ($item['status'] == 'W') {
+                $status = '<span class="bdt-text-success bdt-text-bold"> Free </span>';
+            } else {
+                $status = '<span class="bdt-text-danger bdt-text-bold" bdt-title="Please Contact License Manager."> Unknown </span>';
+            }
+
+            $action = 'A' == $item['status'] ? 'Remove' : '';
+
+            $domain_list .= '<li><div>
+                <span>' . $item['full_domain'] . ' </span>
+                <a href="javascript:void(0);" id="bdts-' . $index . '-' .  $rand_data . '"  data-id="bdts-' . $index . '-' .  $rand_data . '" class="bdts-remove-domain bdt-background-danger" data-license="' . $license_code . '" data-domain="' . $item['full_domain'] . '">'. $action. '</a></div>
+                <div class="bdt-margin-small">Domain Status - ' . $status . ' </div>
+                <div>Server IP - ' . $item['server_ip'] . ' </div>
+                <div>WP Version - ' . $item['version'] . ' </div>
+                <div>Active Time - ' . $item['active_time'] . ' </div>
+            </li>';
+        }
+
+        return $domain_list;
+
+    }
+
+    /**
      * Get the details of License
      *
      * @return void
@@ -146,17 +266,10 @@ class BDTS_APP {
         } else {
             $has_support = '<span class="bdt-text-danger bdt-text-bold" bdt-title="Please Contact License Manager."> Unknown </span>';
         }
-        $domain_list = '';
-        if (empty($response['active_domains'])) {
-            $domain_list = '<strong class="bdt-text-danger">Domain Not Found.</strong>';
-        }
-        foreach ($response['active_domains'] as $index => $item) {
-            $rand_data = rand(100, 1000);
-            $domain_list .= '<li><div>
-                <span>' . $item . ' </span>
-                <a href="javascript:void(0);" id="bdts-' . $index . '-' .  $rand_data . '"  data-id="bdts-' . $index . '-' .  $rand_data . '" class="bdts-remove-domain bdt-background-danger" data-license="' . $response['purchase_key'] . '" data-domain="' . $item . '">Remove</a></div>
-            </li>';
-        }
+
+        $email = $this->get_client_email($response['client_id']);
+
+        $domain_list = $this->active_websites($email, $response['purchase_key']);
 
         $result = '';
 
@@ -215,7 +328,7 @@ class BDTS_APP {
                         </tr>
                     </tbody>
                 </table>
-                <h3 class="bdt-margin bdt-padding-small bdt-text-center">Active Domain\'s</h3>
+                <h3 class="bdt-margin bdt-padding-small bdt-text-center">Domain\'s Log</h3>
                 <div class="bdt-margin">
                     <input id="bdts-domain-search-input" class="bdt-input bdt-form-width-large bdts-domain-search-input" type="text" placeholder="Search Domain">
                 </div>
@@ -523,6 +636,8 @@ class BDTS_APP {
      * @return void
      */
     public function remove_domain($data) {
+
+        // print_r($data); wp_die();
 
         if (!isset($data['license_code']) || !isset($data['domain'])) {
             $this->throw_error();
